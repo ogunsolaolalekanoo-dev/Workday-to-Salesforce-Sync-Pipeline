@@ -25,3 +25,44 @@ Typical outputs include:
 - `Salesforce_Workday_Upsert.xlsx` (optional audit copy)
 
 ## Repository Structure
+workday-salesforce-data-integration/
+├── notebooks/
+│ └── email_mapping_pipeline.ipynb
+├── docs/
+│ └── architecture.md
+├── data/
+│ ├── raw/
+│ └── processed/
+└── exports/
+
+
+## Data Governance
+- This repo does **not** include real PII.
+- Use anonymized or synthetic samples only.
+- Keep raw exports local and excluded via `.gitignore`.
+
+## Tech Stack
+Python, pandas, JSON processing, CSV/Excel exports, validation checks
+
+## Notes
+This project emphasizes **data integrity** and **safe enterprise ingestion**: deterministic identity resolution, duplication prevention, and validation before export.
+
+# Architecture
+
+## Inputs
+- Workday Worker JSON export
+- Salesforce Contacts export
+- (Optional) Salesforce Accounts reference export
+
+## Processing Stages
+1. JSON parsing & normalization
+2. Email identity set construction
+3. Cross-system matching (Workday ↔ Salesforce)
+4. Duplicate detection
+5. Create vs Update classification
+6. Export generation (CSV/Excel)
+7. Validation summary
+
+## Outputs
+- Salesforce-ready CREATE/UPDATE upsert files
+- Validation summary metrics
