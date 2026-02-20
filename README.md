@@ -1,187 +1,68 @@
-Workday → Salesforce Identity Reconciliation Module
+# Workday → Salesforce Data Integration Pipeline
 
-Type: Production-Inspired Data Engineering Component
-Domain: HR → CRM Data Integration
-Focus: Deterministic identity resolution, validation, and ingestion-ready upsert generation
+**Type:** Enterprise Data Engineering System  
+**Domain:** HR → CRM Identity Reconciliation  
+**Focus:** Deterministic identity resolution, schema normalization, and Salesforce-ready upsert exports
 
-📌 Executive Overview
+## Overview
+This repository contains a reproducible pipeline that reconciles nested Workday Worker JSON with Salesforce contact records.  
+It normalizes semi-structured HR exports, resolves identity via deterministic email matching, detects duplicates, and generates validated CREATE/UPDATE upsert files for safe Salesforce ingestion.
 
-This repository demonstrates a production-inspired data reconciliation module designed to synchronize HR-style JSON exports (e.g., Workday) with CRM contact schemas (e.g., Salesforce).
+## Key Capabilities
+- Parse and normalize nested Workday Worker JSON  
+- Construct deterministic email identity sets (multi-field email reconciliation)  
+- Match Workday workers to Salesforce contacts (exact-match intersection)  
+- Classify **Create vs Update** records for controlled upsert processing  
+- Detect potential duplicates / identity collisions  
+- Generate Salesforce-ready exports (CSV + optional Excel audit copy)  
+- Run validation checks (counts, duplicates, coverage, mismatches)
 
-The module enforces:
+## Outputs
+Typical outputs include:
+- `Salesforce_Workday_Upsert.csv`
+- `Contacts_CREATE.csv`
+- `Contacts_UPDATE.csv`
+- `Salesforce_Workday_Upsert.xlsx` (optional audit copy)
 
-Deterministic identity resolution
-
-Schema normalization
-
-Duplicate detection
-
-Controlled Create vs Update classification
-
-Pre-ingestion validation
-
-It models how enterprise data pipelines should reconcile cross-system records before CRM ingestion.
-
-All included data is anonymized or synthetic.
-
-🎯 Architectural Intent
-
-In enterprise environments, employee/contact data is frequently fragmented across:
-
-HR information systems
-
-CRM platforms
-
-Operational exports
-
-Without controlled reconciliation:
-
-Duplicate identities propagate
-
-Referential integrity breaks
-
-Primary relationship conflicts arise
-
-Manual cleanup becomes operationally expensive
-
-This module demonstrates how to implement structured reconciliation logic prior to ingestion.
-
-🏛 Module Architecture
-🔹 Input Contracts
-
-Nested HR-style worker JSON export
-
-CRM contact export (relational schema)
-
-Optional account reference export
-
-🔹 Processing Stages
-1️⃣ JSON Normalization Layer
-
-Flatten nested worker attributes
-
-Standardize schema structure
-
-Enforce null safety & type consistency
-
-2️⃣ Deterministic Identity Resolution
-
-Email identity is constructed using canonical rules:
-
-Primary work email
-
-Derived username variants
-
-Lowercase normalization
-
-Whitespace trimming
-
-Set-based deduplication
-
-Exact-match intersection is used to avoid probabilistic misclassification.
-
-3️⃣ Cross-System Reconciliation
-
-Worker identity sets are compared against aggregated CRM email fields.
-
-Each record is classified as:
-
-Update → deterministic match exists
-
-Create → no existing CRM match
-
-4️⃣ Duplicate Detection Layer
-
-Pre-ingestion checks include:
-
-Email collision detection
-
-Multi-record identity overlap
-
-Duplicate CRM email aggregation
-
-This reduces ingestion risk.
-
-5️⃣ Validation & Observability
-
-Before export, the module validates:
-
-Record count integrity
-
-Create/Update distribution
-
-Duplicate detection summary
-
-Email coverage rate
-
-This ensures ingestion safety.
-
-6️⃣ Controlled Export Generation
-
-Generates ingestion-ready CSV files:
-
-Structured for CRM upsert
-
-Segmented by Create vs Update
-
-Compatible with staged ingestion workflows
-
-📂 Repository Structure
+## Repository Structure
 workday-salesforce-data-integration/
 ├── notebooks/
-│   └── email_mapping_pipeline.ipynb
+│ └── email_mapping_pipeline.ipynb
 ├── docs/
-│   └── architecture.md
+│ └── architecture.md
 ├── data/
-│   ├── raw/           # anonymized samples only
-│   └── processed/
-├── exports/
-└── README.md
+│ ├── raw/
+│ └── processed/
+└── exports/
 
-Future modularization path:
 
-src/
-├── normalize.py
-├── identity_resolution.py
-├── reconcile.py
-├── validate.py
-└── export.py
-🔐 Data Governance
+## Data Governance
+- This repo does **not** include real PII.
+- Use anonymized or synthetic samples only.
+- Keep raw exports local and excluded via `.gitignore`.
 
-No production data included
+## Tech Stack
+Python, pandas, JSON processing, CSV/Excel exports, validation checks
 
-No PII committed
+## Notes
+This project emphasizes **data integrity** and **safe enterprise ingestion**: deterministic identity resolution, duplication prevention, and validation before export.
 
-All examples anonymized
+# Architecture
 
-Designed for portfolio demonstration purposes
+## Inputs
+- Workday Worker JSON export
+- Salesforce Contacts export
+- (Optional) Salesforce Accounts reference export
 
-🛠 Technology Stack
+## Processing Stages
+1. JSON parsing & normalization
+2. Email identity set construction
+3. Cross-system matching (Workday ↔ Salesforce)
+4. Duplicate detection
+5. Create vs Update classification
+6. Export generation (CSV/Excel)
+7. Validation summary
 
-Python
-
-pandas
-
-JSON parsing
-
-CSV/Excel export handling
-
-Validation visualization
-
-Git version control
-
-🧠 Engineering Design Principles
-
-This module emphasizes:
-
-Deterministic identity logic
-
-Referential integrity enforcement
-
-Duplicate prevention before ingestion
-
-Schema reconciliation discipline
-
-Reproducibility & auditability
-
-Integration pipelines should fail safely and validate before export.
+## Outputs
+- Salesforce-ready CREATE/UPDATE upsert files
+- Validation summary metrics
